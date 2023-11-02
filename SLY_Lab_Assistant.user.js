@@ -1833,7 +1833,22 @@
                 let scanConditionLog = scanResult && scanResult.meta.logMessages ? scanResult.meta.logMessages.find(item => item.startsWith("Program log: SDU probability:")) : null;
                 let scanCondition = scanConditionLog ? (Number(scanConditionLog.split(' ').pop())*100).toFixed(4) : 0;
                 console.log(`[${userFleets[i].label}] ${new Date(Date.now()).toISOString()}`);
-                console.log(`[${userFleets[i].label}] ${scanCondition}`);
+		
+		console.log(`[${userFleets[i].label}] ${scanCondition}`);
+                const sclt = 15; //Scan Condition Lower Threshold
+                const scut = 35; //Scan Condition Upper Threshold
+                let shouldMove = scanCondition > sclt ? false : true;
+                userFleets[i].scanSkipCnt = scanCondition > sclt ? 0 : userFleets[i].scanSkipCnt + 1;
+                if (changesSDU.postBalance != changesSDU.preBalance) {
+                    console.log(`[${userFleets[i].label}] FOUND: ${changesSDU.postBalance - changesSDU.preBalance}`);
+                    shouldMove = scanCondition > scut ? false : true;
+                    userFleets[i].scanSkipCnt = 0;
+                    //scanTimer = userFleets[i].scanCost > 0 ? 180 : userFleets[i].scanCooldown;
+                } else {
+                    console.log(`[${userFleets[i].label}] Whomp whomp`);
+                }
+                console.log(`[${userFleets[i].label}] shouldMove: ${shouldMove}`);		
+                /*console.log(`[${userFleets[i].label}] ${scanCondition}`);
                 let shouldMove = scanCondition > 10 ? false : true;
                 userFleets[i].scanSkipCnt = scanCondition > 10 ? 0 : userFleets[i].scanSkipCnt + 1;
                 if (changesSDU.postBalance != changesSDU.preBalance) {
@@ -1844,7 +1859,7 @@
                 } else {
                     console.log(`[${userFleets[i].label}] Whomp whomp`);
                 }
-                console.log(`[${userFleets[i].label}] shouldMove: ${shouldMove}`);
+                console.log(`[${userFleets[i].label}] shouldMove: ${shouldMove}`); */
                 let nextMoveIdx = userFleets[i].scanBlockIdx > 2 ? 0 : userFleets[i].scanBlockIdx+1;
                 userFleets[i].scanBlockIdx = shouldMove ? nextMoveIdx : userFleets[i].scanBlockIdx;
                 console.log(`[${userFleets[i].label}] Tools Remaining: ${changesTool.postBalance}`);
